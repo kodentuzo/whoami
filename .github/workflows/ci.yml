@@ -1,0 +1,156 @@
+name: CI
+
+# Pull requests and main: verify (Biome, types, tests, NOTICE), then build the image, without
+# pushing, and scan it. v* tags: the same, then push vindotski/whoami:X.Y.Z and X.Y for amd64
+# and arm64, with provenance. Pushes to main also publish docs/ to the wiki.
+# branch-name.yml checks the branch's name.
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # pnpm's version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify
+
+  # Needs the repository variable DOCKERHUB_USERNAME and the secret DOCKERHUB_TOKEN to push.
+  image:
+    name: Image
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PUSH: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A release tag must match package.json's version (bump it in the release commit).
+      - name: Check the tag matches package.json
+        if: env.PUSH == 'true'
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          tag="${REF#refs/tags/v}"
+          version="$(jq -r .version package.json)"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Tag v$tag doesn't match package.json version $version"
+            exit 1
+          fi
+
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        if: env.PUSH == 'true'
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # v1.2.3 → 1.2.3 and 1.2 (no bare major before 1.0), and latest.
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ vars.DOCKERHUB_USERNAME || 'vindotski' }}/whoami
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
+          labels: |
+            org.opencontainers.image.title=whoami
+            org.opencontainers.image.description=A test app that checks a Spotcraft instance end to end
+            org.opencontainers.image.licenses=Unlicense
+            org.opencontainers.image.source=https://github.com/kodentuzo/whoami
+
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ env.PUSH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: ${{ env.PUSH == 'true' && 'mode=max' || 'false' }}
+          sbom: ${{ env.PUSH == 'true' }}
+          cache-from: type=gha,scope=whoami
+          cache-to: type=gha,scope=whoami,mode=max
+
+      # Scan what was just built (amd64, from the same cache): fail on HIGH/CRITICAL issues
+      # that have a fix. Unfixable base-image CVEs don't block.
+      - name: Load the image for scanning
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: scan/whoami:ci
+          cache-from: type=gha,scope=whoami
+      - name: Scan for fixable vulnerabilities
+        env:
+          TRIVY: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+          IMAGE: scan/whoami:ci
+        run: |
+          docker save -o image.tar "$IMAGE"
+          docker run --rm -v "$PWD/image.tar:/image.tar:ro" "$TRIVY" image --quiet --input /image.tar \
+            --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1
+
+  # Release tags only: the GitHub release, with the changelog's section.
+  release:
+    name: Release
+    needs: image
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="${TAG#v}"
+          awk -v v="$version" '$0 ~ "^## \\[" v "\\]" {on=1; next} /^## \[/ {on=0} on' CHANGELOG.md > notes.md
+          gh release create "$TAG" --title "$TAG" --notes-file notes.md --verify-tag
+
+  # Pushes to main only: docs/ becomes the wiki, with the ecosystem's wiki action.
+  wiki:
+    needs: [verify]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    concurrency:
+      group: wiki
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: kodentuzo/ecosystem/.github/actions/wiki@686f7b4615c640fe9a5e8476815c45f83416a4d2 # main, 2026-11-21
+        with:
+          token: ${{ github.token }}

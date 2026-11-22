@@ -1,0 +1,38 @@
+name: Branch name
+
+# Pull requests only: the target must be main, and the branch feature/, bugfix/ or chore/
+# (CONTRIBUTING.md). Its own workflow so it also runs when a pull request is retargeted or renamed
+# (`edited`), without running the rest of CI again. The ruleset on main requires branch-name.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: branch-name-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Work happens on short-lived branches cut from main and merged back into it: feature/,
+  # bugfix/ or chore/, then lowercase letters, digits, dots and hyphens (CONTRIBUTING.md).
+  # Dependabot names its own branches.
+  branch-name:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Check the branch and its target
+        env:
+          HEAD: ${{ github.head_ref }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          if [ "$BASE" != main ]; then
+            echo "::error::Open the pull request against main, not $BASE."
+            exit 1
+          fi
+          if ! echo "$HEAD" | grep -Eq '^((feature|bugfix|chore)/[a-z0-9][a-z0-9.-]*|dependabot/.+)$'; then
+            echo "::error::Name the branch feature/<name>, bugfix/<name> or chore/<name> (lowercase letters, digits, dots and hyphens), not $HEAD."
+            exit 1
+          fi

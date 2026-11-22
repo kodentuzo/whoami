@@ -1,0 +1,32 @@
+{
+  "name": "whoami",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A test app that checks a Spotcraft instance end to end",
+  "license": "Unlicense",
+  "type": "module",
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "migrate": "node src/migrate.ts",
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "typecheck": "tsc",
+    "test": "node --test 'test/**/*.test.ts'",
+    "notice": "node scripts/check-notice.ts",
+    "verify": "pnpm check && pnpm typecheck && pnpm test && pnpm notice"
+  },
+  "dependencies": {
+    "nodemailer": "10.6.1",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.7",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "typescript": "^6.0.3"
+  }
+}
