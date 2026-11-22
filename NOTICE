@@ -1,0 +1,36 @@
+whoami
+https://github.com/kodentuzo/whoami
+
+This repository's own code is released into the public domain under the
+Unlicense (see LICENSE). That covers only the files in this repository.
+
+The parts below come from others, under their own licenses. Their full
+license texts ship with each package (node_modules/<name>/LICENSE in the
+image) or at the links given.
+
+npm packages (production dependencies)
+--------------------------------------
+nodemailer             MIT-0  https://github.com/nodemailer/nodemailer
+pg                     MIT    https://github.com/brianc/node-postgres
+pg-connection-string   MIT    https://github.com/brianc/node-postgres
+pg-pool                MIT    https://github.com/brianc/node-postgres
+pg-protocol            MIT    https://github.com/brianc/node-postgres
+pg-types               MIT    https://github.com/brianc/node-pg-types
+pg-int8                ISC    https://github.com/charmander/pg-int8
+pgpass                 MIT    https://github.com/hoegaarden/pgpass
+postgres-array         MIT    https://github.com/bendrucker/postgres-array
+postgres-bytea         MIT    https://github.com/bendrucker/postgres-bytea
+postgres-date          MIT    https://github.com/bendrucker/postgres-date
+postgres-interval      MIT    https://github.com/bendrucker/postgres-interval
+split2                 ISC    https://github.com/mcollina/split2
+xtend                  MIT    https://github.com/Raynos/xtend
+
+The container image (vindotski/whoami)
+--------------------------------------
+gcr.io/distroless/nodejs26-debian13   Apache-2.0
+  https://github.com/GoogleContainerTools/distroless
+Node.js                               MIT, with bundled parts under other
+                                      licenses
+  https://github.com/nodejs/node/blob/main/LICENSE
+Debian packages in the base image     each under its own license; see
+                                      /usr/share/doc/*/copyright in the image
