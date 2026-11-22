@@ -12,7 +12,7 @@ The parts it uses keep their own licenses ([NOTICE](NOTICE)).
 
 1. In your Spotcraft dashboard, add an app:
    - **Name:** `whoami`;
-   - **Image:** `vindotski/whoami`, tag `0.1.0`;
+   - **Image:** `vindotski/whoami`, tag `0.2.0`;
    - **Environment:** `WHOAMI_MAIL_TO=<your address>`, if you want to send a test email.
 2. Open `https://whoami.<your apps domain>`.
 3. Press **Send a test email**. Look at its headers in your inbox (Gmail and Outlook: "Show
@@ -25,15 +25,15 @@ The same report comes as JSON: `curl -H 'Accept: application/json' https://whoam
 
 ## What each check means
 
-| Check       | Green means                                                                                                             | If not                                                                                                           |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| HTTPS       | Caddy reached the app over HTTPS (`X-Forwarded-Proto: https`).                                                          | Plain HTTP means nothing is in front of the app, as when you run it locally.                                     |
-| Environment | Every variable Spotcraft always sets is there. Secrets show only as "set".                                              | A missing one points at the instance's version or setup.                                                         |
-| Database    | The app's role reached its own schema, the migration created `visits`, and this visit was counted.                      | "Migration didn't run": the image's `dev.spotcraft.migrate` label wasn't run. Otherwise the error from Postgres. |
-| Mail        | The instance has a mail provider, and `WHOAMI_MAIL_TO` is set.                                                          | Off: the instance has no `MAIL_SMTP_URL`. Amber: set `WHOAMI_MAIL_TO`.                                           |
-| Accounts    | The user pool's public keys are reachable.                                                                              | Off: the instance has no pool.                                                                                   |
-| Legal facts | `LEGAL_FACTS` parses and names a controller.                                                                            | Amber: fill in your details on the dashboard's Settings page.                                                    |
-| Analytics   | The browser loaded `/_spotcraft/s.js`, so this visit counts. It follows the instance's mode: opt-out, opt-in or server. | Off: analytics are off for this app.                                                                             |
+| Check       | Green means                                                                                                                                                                                             | If not                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| HTTPS       | Caddy reached the app over HTTPS (`X-Forwarded-Proto: https`).                                                                                                                                          | Plain HTTP means nothing is in front of the app, as when you run it locally.                                     |
+| Environment | Every variable Spotcraft always sets is there. Secrets show only as "set".                                                                                                                              | A missing one points at the instance's version or setup.                                                         |
+| Database    | The app's role reached its own schema, the migration created `visits`, and this visit was counted.                                                                                                      | "Migration didn't run": the image's `dev.spotcraft.migrate` label wasn't run. Otherwise the error from Postgres. |
+| Mail        | The instance has a mail provider, and `WHOAMI_MAIL_TO` is set.                                                                                                                                          | Off: the instance has no `MAIL_SMTP_URL`. Amber: set `WHOAMI_MAIL_TO`.                                           |
+| Accounts    | The user pool's public keys are reachable.                                                                                                                                                              | Off: the instance has no pool.                                                                                   |
+| Legal facts | `LEGAL_FACTS` parses and names a controller.                                                                                                                                                            | Amber: fill in your details on the dashboard's Settings page.                                                    |
+| Analytics   | The browser loaded the tracker (`/_spotcraft/s.js`, Spotless on Spotcraft 0.15+), so this visit counts, plus one test event, `whoami-check`. It follows the instance's mode: opt-out, opt-in or server. | Off: analytics are off for this app.                                                                             |
 
 Each page view adds a row to `visits`, so the count is something to back up and restore: after a
 restore, it goes back to what it was.
