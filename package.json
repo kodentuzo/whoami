@@ -1,6 +1,6 @@
 {
   "name": "whoami",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "A test app that checks a Spotcraft instance end to end",
   "license": "Unlicense",

@@ -118,8 +118,14 @@ export const CLIENT_JS = `(async () => {
     const script = document.createElement('script')
     script.defer = true
     script.src = '/_spotcraft/s.js'
-    script.dataset.websiteId = config.websiteId
-    script.onload = () => set('ok', 'Tracker loaded from /_spotcraft/s.js; this visit counts (' + config.mode + ').')
+    // Spotcraft before 0.15 served Umami's tracker, which needed its website id.
+    if (config.websiteId) script.dataset.websiteId = config.websiteId
+    script.onload = () => {
+      // One test event, the way an app sends its own (Spotless's spotless.track).
+      const track = window.spotless ? window.spotless.track : window.umami && window.umami.track
+      if (track) track('whoami-check', { mode: config.mode })
+      set('ok', 'Tracker loaded from /_spotcraft/s.js; this visit and a test event "whoami-check" count (' + config.mode + ').')
+    }
     script.onerror = () => set('fail', 'Could not load /_spotcraft/s.js.')
     document.head.append(script)
   }
