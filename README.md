@@ -17,7 +17,8 @@ The parts it uses keep their own licenses ([NOTICE](NOTICE)).
 
 1. In your Spotcraft dashboard, add an app:
    - **Name:** `whoami`;
-   - **Image:** `vindotski/whoami`, tag `0.2.0` (today from Docker Hub; see
+   - **Image:** `vindotski/whoami`, tag `0.2.0` (today from Docker Hub; once the instance pulls
+     only from its Spotdeck, push the image there first, see
      [Today and planned](#today-and-planned));
    - **Environment:** `WHOAMI_MAIL_TO=<your address>`, if you want to send a test email.
 2. Open `https://whoami.<your apps domain>`.
@@ -75,13 +76,19 @@ Spotcraft 0.20). The code is not changed yet; it follows when Spotcraft does.
   contract. whoami's Content-Security-Policy already allows the counting script, since it is
   served from the app's own origin.
 - **One registry per instance (planned).** Spotdeck ships in every instance, and Spotcraft pulls
-  only from it. Then an app is a name and a tag on the instance's own Spotdeck, so
-  `vindotski/whoami` is pushed there first. Today the instance pulls it from Docker Hub.
+  only from it. Then an app is a name and a tag on the instance's own Spotdeck, so the image has
+  to be in the instance's Spotdeck first. There is one way to get a public image there: the
+  owner pulls `vindotski/whoami` from Docker Hub and pushes it from their own machine, with
+  the push token of the `whoami` repository (decided 2026-11-23). Today the instance pulls it
+  from Docker Hub, so deploying needs no push.
   Spotdeck keeps the last 10 tags of each app and never deletes the live one, so whoami kept as
   a canary stays deployable.
 - **Backups move to Spotvault (planned).** Copies are encrypted before they leave the server, so
   the object in the bucket is no longer a readable `database.dump`. After a restore, Spotcraft
   redeploys the app, so its migration runs, and the visit count goes back to what it was.
+- **No `LEGAL_FACTS` variable (planned, Spotcraft 0.21).** An app reads the legal facts at
+  `/_spotcraft/legal.json`, through Spotkit. The variable goes in 0.21 with the other old ways,
+  so the Legal facts check then reads that file instead. Today it reads `LEGAL_FACTS`.
 - **No Cloudflare.** whoami never talks to Cloudflare. It checks the HTTPS that Caddy gives
   the app.
 - **No `spotkit.json` needed.** whoami runs its migration through the image's
