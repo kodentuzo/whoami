@@ -61,20 +61,35 @@ whoami checks what an instance does **today**. Some of that changes with the slo
 Spotcraft 0.20). The code is not changed yet; it follows when Spotcraft does.
 
 - **Every slot is always on (planned).** An instance runs all eight slots: accounts, analytics,
-  mail, legal, registry, backups, monitoring and sync (sync after the MVP). Today a check can show
-  "Off" when the instance has no user pool, no mail provider or analytics turned off. Once every
-  slot is required, "Off" for Mail, Accounts or Analytics means a broken instance, not a choice.
-- **Analytics has one mode (planned, Spotless 0.2).** Visits are counted, never people: no
-  cookies, nothing stored on the device, no consent banner. Today the check still follows the
-  instance's mode (opt-out, opt-in or server). The opt-in and server branches go away.
+  mail, legal, registry, backups, monitoring and sync (sync after the MVP). A mail provider and a
+  backup bucket become required setup steps, and setup fails without them. Today a
+  check can show "Off" when the instance has no user pool, no mail provider or analytics turned
+  off. Once every slot is required, "Off" for Mail, Accounts or Analytics means a broken
+  instance, not a choice.
+- **Analytics has one mode and no switch (planned, Spotless 0.2).** Visits are counted, never
+  people: no cookies, nothing stored on the device, no consent banner. Every app on an instance
+  is counted the same way, and the per-app `analytics: false` switch goes. Today the check still
+  follows the instance's mode (opt-out, opt-in or server) and the app's switch. The opt-in,
+  server and "off for this app" branches go away. The check reads `/_spotcraft/config.json`,
+  which then lists every slot with its path; whoami follows the field names in Spotcraft's
+  contract. whoami's Content-Security-Policy already allows the counting script, since it is
+  served from the app's own origin.
 - **One registry per instance (planned).** Spotdeck ships in every instance, and Spotcraft pulls
   only from it. Then an app is a name and a tag on the instance's own Spotdeck, so
   `vindotski/whoami` is pushed there first. Today the instance pulls it from Docker Hub.
+  Spotdeck keeps the last 10 tags of each app and never deletes the live one, so whoami kept as
+  a canary stays deployable.
+- **Backups move to Spotvault (planned).** Copies are encrypted before they leave the server, so
+  the object in the bucket is no longer a readable `database.dump`. After a restore, Spotcraft
+  redeploys the app, so its migration runs, and the visit count goes back to what it was.
 - **No Cloudflare.** whoami never talks to Cloudflare. It checks the HTTPS that Caddy gives
   the app.
 - **No `spotkit.json` needed.** whoami runs its migration through the image's
   `dev.spotcraft.migrate` label, which the server reads. `spotkit.json` (which replaces
   `spotcraft.json`) is read only by Spotkit's CLI for local work, and whoami doesn't use it.
+
+whoami already meets the privacy baseline: it stores no IP address, sets no cookie and keeps
+nothing on the device. Its `visits` table holds only an id and a time.
 
 ## Development
 
