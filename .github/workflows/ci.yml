@@ -1,7 +1,7 @@
 name: CI
 
 # Pull requests and main: verify (Biome, types, tests, NOTICE), then build the image, without
-# pushing, and scan it. v* tags: the same, then push vindotski/whoami:X.Y.Z and X.Y for amd64
+# pushing, and scan it. v* tags: the same, then push kodentuzo/whoami:X.Y.Z and X.Y for amd64
 # and arm64, with provenance. Pushes to main also publish docs/ to the wiki.
 # branch-name.yml checks the branch's name.
 on:
@@ -72,7 +72,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
-          images: ${{ vars.DOCKERHUB_USERNAME || 'vindotski' }}/whoami
+          images: ${{ vars.DOCKERHUB_USERNAME || 'kodentuzo' }}/whoami
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}

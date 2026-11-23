@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Changed
+
+- Images are published as kodentuzo/<name> on Docker Hub; vindotski/<name> keeps the old versions.
+
 ## [0.2.0] - 2026-11-22
 
 ### Changed

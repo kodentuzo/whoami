@@ -2,7 +2,7 @@
 
 Check that a [Spotcraft](https://kodentuzo.com/spotcraft) instance serves apps.
 
-**State: live.** Version 0.2.0, image `vindotski/whoami`. It checks Spotcraft 0.19 as it is
+**State: live.** Version 0.2.0, image `kodentuzo/whoami`. It checks Spotcraft 0.19 as it is
 today. The changes the slots bring are planned; see [Today and planned](#today-and-planned).
 
 Deploy it, open its page, and see what the instance gives an app: HTTPS, the environment, the
@@ -17,7 +17,7 @@ The parts it uses keep their own licenses ([NOTICE](NOTICE)).
 
 1. In your Spotcraft dashboard, add an app:
    - **Name:** `whoami`;
-   - **Image:** `vindotski/whoami`, tag `0.2.0` (today from Docker Hub; once the instance pulls
+   - **Image:** `kodentuzo/whoami`, tag `0.2.0` (today from Docker Hub; once the instance pulls
      only from its Spotdeck, push the image there first, see
      [Today and planned](#today-and-planned));
    - **Environment:** `WHOAMI_MAIL_TO=<your address>`, if you want to send a test email.
@@ -78,7 +78,7 @@ Spotcraft 0.20). The code is not changed yet; it follows when Spotcraft does.
 - **One registry per instance (planned).** Spotdeck ships in every instance, and Spotcraft pulls
   only from it. Then an app is a name and a tag on the instance's own Spotdeck, so the image has
   to be in the instance's Spotdeck first. There is one way to get a public image there: the
-  owner pulls `vindotski/whoami` from Docker Hub and pushes it from their own machine, with
+  owner pulls `kodentuzo/whoami` from Docker Hub and pushes it from their own machine, with
   the push token of the `whoami` repository (decided 2026-11-23). Today the instance pulls it
   from Docker Hub, so deploying needs no push.
   Spotdeck keeps the last 10 tags of each app and never deletes the live one, so whoami kept as
