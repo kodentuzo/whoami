@@ -1,9 +1,14 @@
 # whoami
 
-A small app that checks a [Spotcraft](https://kodentuzo.com/spotcraft) instance end to end. Deploy
-it, open its page, and see what Spotcraft gives an app: HTTPS, the environment, the database and
-its migration, the mail relay, the user pool, the legal facts and analytics. It works like
+Check that a [Spotcraft](https://kodentuzo.com/spotcraft) instance serves apps.
+
+**State: live.** Version 0.2.0, image `vindotski/whoami`. It checks Spotcraft 0.19 as it is
+today. The changes the slots bring are planned; see [Today and planned](#today-and-planned).
+
+Deploy it, open its page, and see what the instance gives an app: HTTPS, the environment, the
+database and its migration, mail, accounts, the legal facts and analytics. It works like
 [traefik/whoami](https://github.com/traefik/whoami), for a whole platform rather than one proxy.
+It has no website page; this repo is its only home.
 
 It's public domain ([the Unlicense](LICENSE)), so you can also copy it as the start of your own app.
 The parts it uses keep their own licenses ([NOTICE](NOTICE)).
@@ -12,7 +17,8 @@ The parts it uses keep their own licenses ([NOTICE](NOTICE)).
 
 1. In your Spotcraft dashboard, add an app:
    - **Name:** `whoami`;
-   - **Image:** `vindotski/whoami`, tag `0.2.0`;
+   - **Image:** `vindotski/whoami`, tag `0.2.0` (today from Docker Hub; see
+     [Today and planned](#today-and-planned));
    - **Environment:** `WHOAMI_MAIL_TO=<your address>`, if you want to send a test email.
 2. Open `https://whoami.<your apps domain>`.
 3. Press **Send a test email**. Look at its headers in your inbox (Gmail and Outlook: "Show
@@ -48,5 +54,28 @@ pnpm install
 DATABASE_URL=postgres://… pnpm migrate
 DATABASE_URL=postgres://… SMTP_URL=smtp://localhost:1025 MAIL_FROM=noreply@example.com WHOAMI_MAIL_TO=you@example.com pnpm start
 ```
+
+## Today and planned
+
+whoami checks what an instance does **today**. Some of that changes with the slots (planned for
+Spotcraft 0.20). The code is not changed yet; it follows when Spotcraft does.
+
+- **Every slot is always on (planned).** An instance runs all eight slots: accounts, analytics,
+  mail, legal, registry, backups, monitoring and sync (sync after the MVP). Today a check can show
+  "Off" when the instance has no user pool, no mail provider or analytics turned off. Once every
+  slot is required, "Off" for Mail, Accounts or Analytics means a broken instance, not a choice.
+- **Analytics has one mode (planned, Spotless 0.2).** Visits are counted, never people: no
+  cookies, nothing stored on the device, no consent banner. Today the check still follows the
+  instance's mode (opt-out, opt-in or server). The opt-in and server branches go away.
+- **One registry per instance (planned).** Spotdeck ships in every instance, and Spotcraft pulls
+  only from it. Then an app is a name and a tag on the instance's own Spotdeck, so
+  `vindotski/whoami` is pushed there first. Today the instance pulls it from Docker Hub.
+- **No Cloudflare.** whoami never talks to Cloudflare. It checks the HTTPS that Caddy gives
+  the app.
+- **No `spotkit.json` needed.** whoami runs its migration through the image's
+  `dev.spotcraft.migrate` label, which the server reads. `spotkit.json` (which replaces
+  `spotcraft.json`) is read only by Spotkit's CLI for local work, and whoami doesn't use it.
+
+## Development
 
 Development and releases: [CONTRIBUTING.md](CONTRIBUTING.md).
