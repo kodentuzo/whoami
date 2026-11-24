@@ -52,7 +52,7 @@ export function renderPage(report: Report, notice?: { ok: boolean; text: string 
 <h1>${e(title)}</h1>
 <p class="lead">Checks what Spotcraft gives this app.${
     report.app.release ? ` Release <code>${e(report.app.release)}</code>.` : ''
-  } <a href="https://github.com/kodentuzo/whoami#what-each-check-means">What each check means</a></p>
+  } <a href="https://github.com/vindotski/whoami#what-each-check-means">What each check means</a></p>
 ${notice ? `<p class="notice ${notice.ok ? 'ok' : 'fail'}" role="status">${e(notice.text)}</p>` : ''}
 <table class="checks">
 ${checks}
