@@ -1,7 +1,7 @@
 name: CI
 
 # Pull requests and main: verify (Biome, types, tests, NOTICE), then build the image, without
-# pushing, and scan it. v* tags: the same, then push kodentuzo/whoami:X.Y.Z and X.Y for amd64
+# pushing, and scan it. v* tags: the same, then push vindotski/whoami:X.Y.Z and X.Y for amd64
 # and arm64, with provenance. Pushes to main also publish docs/ to the wiki.
 # branch-name.yml checks the branch's name.
 on:
@@ -72,7 +72,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
-          images: ${{ vars.DOCKERHUB_USERNAME || 'kodentuzo' }}/whoami
+          images: ${{ vars.DOCKERHUB_USERNAME || 'vindotski' }}/whoami
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -81,7 +81,7 @@ jobs:
             org.opencontainers.image.title=whoami
             org.opencontainers.image.description=A test app that checks a Spotcraft instance end to end
             org.opencontainers.image.licenses=Unlicense
-            org.opencontainers.image.source=https://github.com/kodentuzo/whoami
+            org.opencontainers.image.source=https://github.com/vindotski/whoami
 
       - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:

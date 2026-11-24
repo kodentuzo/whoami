@@ -11,6 +11,6 @@ back into it through pull requests.
 - **Before pushing:** `pnpm verify` (Biome, types, tests, and NOTICE against the dependencies).
   A new production dependency needs a line in `NOTICE`.
 - **Releases:** bump `version` in `package.json`, move `Unreleased` to the new version, merge,
-  then push a signed `vX.Y.Z` tag on `main`. CI publishes `kodentuzo/whoami:X.Y.Z` and creates
+  then push a signed `vX.Y.Z` tag on `main`. CI publishes `vindotski/whoami:X.Y.Z` and creates
   the GitHub release.
 - **License:** contributions are released into the public domain under the Unlicense.

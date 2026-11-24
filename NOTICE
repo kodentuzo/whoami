@@ -1,5 +1,5 @@
 whoami
-https://github.com/kodentuzo/whoami
+https://github.com/vindotski/whoami
 
 This repository's own code is released into the public domain under the
 Unlicense (see LICENSE). That covers only the files in this repository.
@@ -25,7 +25,7 @@ postgres-interval      MIT    https://github.com/bendrucker/postgres-interval
 split2                 ISC    https://github.com/mcollina/split2
 xtend                  MIT    https://github.com/Raynos/xtend
 
-The container image (kodentuzo/whoami)
+The container image (vindotski/whoami)
 --------------------------------------
 gcr.io/distroless/nodejs26-debian13   Apache-2.0
   https://github.com/GoogleContainerTools/distroless
